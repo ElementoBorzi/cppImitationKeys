@@ -1,6 +1,5 @@
 #include <iostream>
 #include <Windows.h>
-#include <TlHelp32.h>
 #include <string>
 #include <chrono>
 #include <thread>
@@ -8,53 +7,25 @@
 // Функция для отправки цифры в выбранный процесс
 void sendNumberToProcess(HWND hwnd, int number)
 {
-    SendMessageW(hwnd, WM_CHAR, '0' + number, 0);
+    SendMessageA(hwnd, WM_CHAR, '0' + number, 0);
 }
 
-// Функция для поиска процесса по названию исполняемого файла
-HWND findProcessByExecutableName(const std::wstring& executableName)
+// Функция для поиска процесса по названию окна
+HWND findProcessByWindowTitle(const std::string& windowTitle)
 {
-    HWND hwnd = NULL;
-
-    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    if (snapshot != INVALID_HANDLE_VALUE)
-    {
-        PROCESSENTRY32W processEntry;
-        processEntry.dwSize = sizeof(PROCESSENTRY32W);
-
-        if (Process32FirstW(snapshot, &processEntry))
-        {
-            do
-            {
-                std::wstring processName = processEntry.szExeFile;
-                if (processName == executableName)
-                {
-                    DWORD processId = processEntry.th32ProcessID;
-                    hwnd = FindWindowW(NULL, processEntry.szExeFile);
-                    if (hwnd != NULL)
-                    {
-                        std::wcout << L"ID процесса: " << processId << std::endl;
-                        break;
-                    }
-                }
-            } while (Process32NextW(snapshot, &processEntry));
-        }
-
-        CloseHandle(snapshot);
-    }
-
+    HWND hwnd = FindWindowA(NULL, windowTitle.c_str());
     return hwnd;
 }
 
 int main()
 {
-    const std::wstring executableName = L"Farm.exe";
+    const std::string windowTitle = "Ферма и деньги";
 
-    HWND hwnd = findProcessByExecutableName(executableName);
+    HWND hwnd = findProcessByWindowTitle(windowTitle);
 
     if (hwnd == NULL)
     {
-        std::wcout << L"Ошибка: не удалось найти процесс с исполняемым файлом " << executableName << std::endl;
+        std::cout << "Ошибка: не удалось найти окно процесса" << std::endl;
         return 1;
     }
 
