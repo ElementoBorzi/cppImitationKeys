@@ -5,28 +5,6 @@
 #include <chrono>
 #include <thread>
 
-// Функция для изменения кодировки консоли на UTF-8
-void setConsoleUTF8Encoding()
-{
-    SetConsoleOutputCP(CP_UTF8);
-    SetConsoleCP(CP_UTF8);
-}
-
-// Функция для установки шрифта консоли
-void setConsoleFont(const std::wstring& fontName, int fontSize)
-{
-    CONSOLE_FONT_INFOEX fontInfo;
-    fontInfo.cbSize = sizeof(CONSOLE_FONT_INFOEX);
-    fontInfo.nFont = 0;
-    fontInfo.dwFontSize.X = 0;
-    fontInfo.dwFontSize.Y = fontSize;
-    fontInfo.FontFamily = FF_DONTCARE;
-    fontInfo.FontWeight = FW_NORMAL;
-    wcscpy_s(fontInfo.FaceName, fontName.c_str());
-
-    SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &fontInfo);
-}
-
 // Функция для имитации нажатия клавиши в выбранном процессе
 void simulateKeyPress(HWND hwnd, int key)
 {
@@ -47,10 +25,9 @@ HWND findProcessByWindowTitle(const std::string& windowTitle)
 
 int main()
 {
-    setConsoleUTF8Encoding(); // Устанавливаем кодировку консоли на UTF-8
-    setConsoleFont(L"Consolas", 16); // Устанавливаем шрифт консоли на Consolas размером 16
-
-    const std::string windowTitle = "World of Warcraft";
+    std::string windowTitle;
+    std::cout << "Введите название окна: ";
+    std::getline(std::cin, windowTitle);
 
     HWND hwnd = findProcessByWindowTitle(windowTitle);
 
@@ -78,4 +55,26 @@ int main()
 
         std::vector<int> keys;
 
-        // Разбиваем введенную строку с клавишами
+        // Разбиваем введенную строку с клавишами на отдельные коды ASCII
+        size_t pos = 0;
+        while ((pos = keyString.find(',')) != std::string::npos)
+        {
+            std::string key = keyString.substr(0, pos);
+            keys.push_back(std::stoi(key));
+            keyString.erase(0, pos + 1);
+        }
+        keys.push_back(std::stoi(keyString));
+
+        while (true)
+        {
+            // Имитируем нажатие для каждого кода ASCII
+            for (int key : keys)
+            {
+                simulateKeyPress(hwnd, key);
+                std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+            }
+        }
+    }
+
+    return 0;
+}
