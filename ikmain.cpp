@@ -12,18 +12,15 @@ void sendNumberToProcess(HWND hwnd, int number)
 
 int main()
 {
-    HWND hwnd = NULL;
-    do
+    const char* processName = "farm.exe"; // Замените "farm.exe" на фактическое название процесса, в которое вы хотите отправлять цифры
+
+    HWND hwnd = FindWindowA(NULL, processName);
+
+    if (hwnd == NULL)
     {
-        hwnd = GetForegroundWindow();
-        DWORD processId;
-        GetWindowThreadProcessId(hwnd, &processId);
-        if (hwnd != NULL && processId != 0)
-        {
-            std::cout << "ID процесса: " << processId << std::endl;
-            break;
-        }
-    } while (true);
+        std::cout << "Ошибка: не удалось найти окно процесса " << processName << std::endl;
+        return 1;
+    }
 
     while (true)
     {
