@@ -1,5 +1,6 @@
 #include <iostream>
 #include <Windows.h>
+#include <string>
 
 // Функция для отправки цифры в выбранный процесс
 void sendNumberToProcess(HWND hwnd, int number)
