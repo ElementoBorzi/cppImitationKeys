@@ -42,13 +42,13 @@ int main()
 
     while (true)
     {
-        std::string keyString;
+        std::string keysString;
         std::string intervalString;
 
-        std::cout << "Введите клавишу (в виде кода ASCII, или 'exit' для выхода): ";
-        std::getline(std::cin, keyString);
+        std::cout << "Введите клавиши (в виде кодов ASCII, разделенных запятой, или 'exit' для выхода): ";
+        std::getline(std::cin, keysString);
 
-        if (keyString == "exit")
+        if (keysString == "exit")
             break;
 
         std::cout << "Введите интервал в миллисекундах: ";
@@ -56,14 +56,24 @@ int main()
 
         int interval = std::stoi(intervalString);
 
-        int key = std::stoi(keyString);
+        std::string::size_type pos = 0;
+        std::string::size_type prevPos = 0;
 
-        while (true)
+        while ((pos = keysString.find(',', prevPos)) != std::string::npos)
         {
-            simulateKeyPress(hwnd, key);
-
+            std::string key = keysString.substr(prevPos, pos - prevPos);
+            int keyASCII = std::stoi(key);
+            simulateKeyPress(hwnd, keyASCII);
+            prevPos = pos + 1;
             std::this_thread::sleep_for(std::chrono::milliseconds(interval));
         }
+
+        // Обработка последней клавиши после последней запятой (или единственной клавиши, если запятых нет)
+        std::string key = keysString.substr(prevPos);
+        int keyASCII = std::stoi(key);
+        simulateKeyPress(hwnd, keyASCII);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(interval));
     }
 
     return 0;
