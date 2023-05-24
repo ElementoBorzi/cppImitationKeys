@@ -1,5 +1,6 @@
 #include <iostream>
 #include <Windows.h>
+#include <TlHelp32.h>
 #include <string>
 #include <chrono>
 #include <thread>
@@ -10,15 +11,50 @@ void sendNumberToProcess(HWND hwnd, int number)
     SendMessageA(hwnd, WM_CHAR, '0' + number, 0);
 }
 
+// Функция для поиска процесса по названию исполняемого файла
+HWND findProcessByExecutableName(const std::string& executableName)
+{
+    HWND hwnd = NULL;
+
+    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snapshot != INVALID_HANDLE_VALUE)
+    {
+        PROCESSENTRY32 processEntry;
+        processEntry.dwSize = sizeof(PROCESSENTRY32);
+
+        if (Process32First(snapshot, &processEntry))
+        {
+            do
+            {
+                std::string processName = processEntry.szExeFile;
+                if (processName == executableName)
+                {
+                    DWORD processId = processEntry.th32ProcessID;
+                    hwnd = FindWindowA(NULL, processEntry.szExeFile);
+                    if (hwnd != NULL)
+                    {
+                        std::cout << "ID процесса: " << processId << std::endl;
+                        break;
+                    }
+                }
+            } while (Process32Next(snapshot, &processEntry));
+        }
+
+        CloseHandle(snapshot);
+    }
+
+    return hwnd;
+}
+
 int main()
 {
-    const char* processName = "farm.exe"; // Замените "farm.exe" на фактическое название процесса, в которое вы хотите отправлять цифры
+    const std::string executableName = "Farm.exe";
 
-    HWND hwnd = FindWindowA(NULL, processName);
+    HWND hwnd = findProcessByExecutableName(executableName);
 
     if (hwnd == NULL)
     {
-        std::cout << "Ошибка: не удалось найти окно процесса " << processName << std::endl;
+        std::cout << "Ошибка: не удалось найти процесс с исполняемым файлом " << executableName << std::endl;
         return 1;
     }
 
