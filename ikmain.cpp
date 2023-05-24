@@ -53,16 +53,7 @@ int main()
             std::string number = numberString.substr(prevPos);
             sendNumberToProcess(hwnd, std::stoi(number));
 
-            std::cout << "Введите цифры, разделенные запятой (или 'exit' для выхода): ";
-            std::getline(std::cin, numberString);
-
-            if (numberString == "exit")
-                break;
-
-            std::cout << "Введите интервал в миллисекундах: ";
-            std::getline(std::cin, intervalString);
-
-            interval = std::stoi(intervalString);
+            std::this_thread::sleep_for(std::chrono::milliseconds(interval));
 
             pos = 0;
             prevPos = 0;
