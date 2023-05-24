@@ -8,36 +8,36 @@
 // Функция для отправки цифры в выбранный процесс
 void sendNumberToProcess(HWND hwnd, int number)
 {
-    SendMessageA(hwnd, WM_CHAR, '0' + number, 0);
+    SendMessageW(hwnd, WM_CHAR, '0' + number, 0);
 }
 
 // Функция для поиска процесса по названию исполняемого файла
-HWND findProcessByExecutableName(const std::string& executableName)
+HWND findProcessByExecutableName(const std::wstring& executableName)
 {
     HWND hwnd = NULL;
 
     HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (snapshot != INVALID_HANDLE_VALUE)
     {
-        PROCESSENTRY32 processEntry;
-        processEntry.dwSize = sizeof(PROCESSENTRY32);
+        PROCESSENTRY32W processEntry;
+        processEntry.dwSize = sizeof(PROCESSENTRY32W);
 
-        if (Process32First(snapshot, &processEntry))
+        if (Process32FirstW(snapshot, &processEntry))
         {
             do
             {
-                std::string processName = processEntry.szExeFile;
+                std::wstring processName = processEntry.szExeFile;
                 if (processName == executableName)
                 {
                     DWORD processId = processEntry.th32ProcessID;
-                    hwnd = FindWindowA(NULL, processEntry.szExeFile);
+                    hwnd = FindWindowW(NULL, processEntry.szExeFile);
                     if (hwnd != NULL)
                     {
-                        std::cout << "ID процесса: " << processId << std::endl;
+                        std::wcout << L"ID процесса: " << processId << std::endl;
                         break;
                     }
                 }
-            } while (Process32Next(snapshot, &processEntry));
+            } while (Process32NextW(snapshot, &processEntry));
         }
 
         CloseHandle(snapshot);
@@ -48,13 +48,13 @@ HWND findProcessByExecutableName(const std::string& executableName)
 
 int main()
 {
-    const std::string executableName = "Farm.exe";
+    const std::wstring executableName = L"Farm.exe";
 
     HWND hwnd = findProcessByExecutableName(executableName);
 
     if (hwnd == NULL)
     {
-        std::cout << "Ошибка: не удалось найти процесс с исполняемым файлом " << executableName << std::endl;
+        std::wcout << L"Ошибка: не удалось найти процесс с исполняемым файлом " << executableName << std::endl;
         return 1;
     }
 
