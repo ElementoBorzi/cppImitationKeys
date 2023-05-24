@@ -1,6 +1,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <string>
+#include <vector>
 #include <chrono>
 #include <thread>
 
@@ -39,7 +40,7 @@ int main()
         std::string keyString;
         std::string intervalString;
 
-        std::cout << "Введите клавишу (в виде кода ASCII, или 'exit' для выхода): ";
+        std::cout << "Введите клавиши (в виде кодов ASCII, разделенных запятыми, или 'exit' для выхода): ";
         std::getline(std::cin, keyString);
 
         if (keyString == "exit")
@@ -50,13 +51,26 @@ int main()
 
         int interval = std::stoi(intervalString);
 
-        int key = std::stoi(keyString);
+        std::vector<int> keys;
+
+        // Разбиваем введенную строку с клавишами на отдельные коды ASCII
+        size_t pos = 0;
+        while ((pos = keyString.find(',')) != std::string::npos)
+        {
+            std::string key = keyString.substr(0, pos);
+            keys.push_back(std::stoi(key));
+            keyString.erase(0, pos + 1);
+        }
+        keys.push_back(std::stoi(keyString));
 
         while (true)
         {
-            simulateKeyPress(hwnd, key);
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+            // Имитируем нажатие для каждого кода ASCII
+            for (int key : keys)
+            {
+                simulateKeyPress(hwnd, key);
+                std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+            }
         }
     }
 
