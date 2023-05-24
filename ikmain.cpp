@@ -4,10 +4,21 @@
 #include <chrono>
 #include <thread>
 
-// Функция для отправки цифры в выбранный процесс
-void sendNumberToProcess(HWND hwnd, int number)
+// Функция для имитации нажатия клавиши в выбранном процессе
+void simulateKeyPress(HWND hwnd, int key)
 {
-    SendMessageA(hwnd, WM_CHAR, '0' + number, 0);
+    INPUT input;
+    input.type = INPUT_KEYBOARD;
+    input.ki.wVk = key;
+    input.ki.dwFlags = 0;
+
+    SendInput(1, &input, sizeof(INPUT));
+
+    // Ждем некоторое время перед отпусканием клавиши
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    input.ki.dwFlags = KEYEVENTF_KEYUP;
+    SendInput(1, &input, sizeof(INPUT));
 }
 
 // Функция для поиска процесса по названию окна
@@ -31,13 +42,13 @@ int main()
 
     while (true)
     {
-        std::string numberString;
+        std::string keyString;
         std::string intervalString;
 
-        std::cout << "Введите цифры, разделенные запятой (или 'exit' для выхода): ";
-        std::getline(std::cin, numberString);
+        std::cout << "Введите клавишу (в виде кода ASCII, или 'exit' для выхода): ";
+        std::getline(std::cin, keyString);
 
-        if (numberString == "exit")
+        if (keyString == "exit")
             break;
 
         std::cout << "Введите интервал в миллисекундах: ";
@@ -45,27 +56,13 @@ int main()
 
         int interval = std::stoi(intervalString);
 
-        std::string::size_type pos = 0;
-        std::string::size_type prevPos = 0;
+        int key = std::stoi(keyString);
 
         while (true)
         {
-            while ((pos = numberString.find(',', prevPos)) != std::string::npos)
-            {
-                std::string number = numberString.substr(prevPos, pos - prevPos);
-                sendNumberToProcess(hwnd, std::stoi(number));
-                prevPos = pos + 1;
-                std::this_thread::sleep_for(std::chrono::milliseconds(interval));
-            }
-
-            // Отправка последней цифры после последней запятой (или единственной цифры, если запятых нет)
-            std::string number = numberString.substr(prevPos);
-            sendNumberToProcess(hwnd, std::stoi(number));
+            simulateKeyPress(hwnd, key);
 
             std::this_thread::sleep_for(std::chrono::milliseconds(interval));
-
-            pos = 0;
-            prevPos = 0;
         }
     }
 
