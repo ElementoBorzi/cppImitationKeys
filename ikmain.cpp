@@ -18,31 +18,34 @@ int main()
         return 1;
     }
 
-    std::string numberString;
-    std::string intervalString;
-
-    std::cout << "Введите цифры, разделенные запятой: ";
-    std::getline(std::cin, numberString);
-
-    std::cout << "Введите интервал в миллисекундах: ";
-    std::getline(std::cin, intervalString);
-
-    int interval = std::stoi(intervalString);
-
-    std::string::size_type pos = 0;
-    std::string::size_type prevPos = 0;
-
-    while ((pos = numberString.find(',', prevPos)) != std::string::npos)
+    while (true)
     {
-        std::string number = numberString.substr(prevPos, pos - prevPos);
-        sendNumberToProcess(hwnd, std::stoi(number));
-        prevPos = pos + 1;
-        Sleep(interval);
-    }
+        std::string numberString;
+        std::string intervalString;
 
-    // Отправка последней цифры после последней запятой (или единственной цифры, если запятых нет)
-    std::string number = numberString.substr(prevPos);
-    sendNumberToProcess(hwnd, std::stoi(number));
+        std::cout << "Введите цифры, разделенные запятой: ";
+        std::getline(std::cin, numberString);
+
+        std::cout << "Введите интервал в миллисекундах: ";
+        std::getline(std::cin, intervalString);
+
+        int interval = std::stoi(intervalString);
+
+        std::string::size_type pos = 0;
+        std::string::size_type prevPos = 0;
+
+        while ((pos = numberString.find(',', prevPos)) != std::string::npos)
+        {
+            std::string number = numberString.substr(prevPos, pos - prevPos);
+            sendNumberToProcess(hwnd, std::stoi(number));
+            prevPos = pos + 1;
+            Sleep(interval);
+        }
+
+        // Отправка последней цифры после последней запятой (или единственной цифры, если запятых нет)
+        std::string number = numberString.substr(prevPos);
+        sendNumberToProcess(hwnd, std::stoi(number));
+    }
 
     return 0;
 }
