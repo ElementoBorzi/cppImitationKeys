@@ -5,6 +5,13 @@
 #include <chrono>
 #include <thread>
 
+// Функция для изменения кодировки консоли на UTF-8
+void setConsoleUTF8Encoding()
+{
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+}
+
 // Функция для имитации нажатия клавиши в выбранном процессе
 void simulateKeyPress(HWND hwnd, int key)
 {
@@ -25,6 +32,8 @@ HWND findProcessByWindowTitle(const std::string& windowTitle)
 
 int main()
 {
+    setConsoleUTF8Encoding(); // Устанавливаем кодировку консоли на UTF-8
+
     const std::string windowTitle = "World of Warcraft";
 
     HWND hwnd = findProcessByWindowTitle(windowTitle);
