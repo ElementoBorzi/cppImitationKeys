@@ -26,14 +26,14 @@ HWND findProcessByWindowTitle(const std::string& windowTitle)
 int main()
 {
     std::string windowTitle;
-    std::cout << "Введите название окна: ";
+    std::cout << "Enter a window name: ";
     std::getline(std::cin, windowTitle);
 
     HWND hwnd = findProcessByWindowTitle(windowTitle);
 
     if (hwnd == NULL)
     {
-        std::cout << "Ошибка: не удалось найти окно процесса" << std::endl;
+        std::cout << "Error: Process window could not be found" << std::endl;
         return 1;
     }
 
@@ -42,13 +42,13 @@ int main()
         std::string keyString;
         std::string intervalString;
 
-        std::cout << "Введите клавиши (в виде кодов ASCII, разделенных запятыми, или 'exit' для выхода): ";
+        std::cout << "Enter the keys (as comma-separated ASCII codes, or 'exit' to exit): ";
         std::getline(std::cin, keyString);
 
         if (keyString == "exit")
             break;
 
-        std::cout << "Введите интервал в миллисекундах: ";
+        std::cout << "Enter the interval in milliseconds: ";
         std::getline(std::cin, intervalString);
 
         int interval = std::stoi(intervalString);
