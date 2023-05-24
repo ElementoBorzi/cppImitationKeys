@@ -3,13 +3,16 @@
 #include <string>
 #include <chrono>
 #include <thread>
+#include <vector>
+#include <sstream>
 
 // Функция для имитации нажатия клавиши в выбранном процессе
-void simulateKeyPress(HWND hwnd, int key)
+void simulateKeyPress(HWND hwnd, WORD key)
 {
     INPUT input;
     input.type = INPUT_KEYBOARD;
     input.ki.wVk = key;
+    input.ki.wScan = MapVirtualKey(key, MAPVK_VK_TO_VSC);
     input.ki.dwFlags = 0;
 
     SendInput(1, &input, sizeof(INPUT));
@@ -45,7 +48,7 @@ int main()
         std::string keysString;
         std::string intervalString;
 
-        std::cout << "Введите клавиши (в виде кодов ASCII, разделенных запятой, или 'exit' для выхода): ";
+        std::cout << "Введите клавиши (в виде виртуальных кодов, разделенных запятой, или 'exit' для выхода): ";
         std::getline(std::cin, keysString);
 
         if (keysString == "exit")
@@ -56,24 +59,20 @@ int main()
 
         int interval = std::stoi(intervalString);
 
-        std::string::size_type pos = 0;
-        std::string::size_type prevPos = 0;
+        std::vector<WORD> keyCodes;
+        std::stringstream ss(keysString);
+        std::string keyCode;
 
-        while ((pos = keysString.find(',', prevPos)) != std::string::npos)
+        while (std::getline(ss, keyCode, ','))
         {
-            std::string key = keysString.substr(prevPos, pos - prevPos);
-            int keyASCII = std::stoi(key);
-            simulateKeyPress(hwnd, keyASCII);
-            prevPos = pos + 1;
-            std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+            keyCodes.push_back(std::stoi(keyCode));
         }
 
-        // Обработка последней клавиши после последней запятой (или единственной клавиши, если запятых нет)
-        std::string key = keysString.substr(prevPos);
-        int keyASCII = std::stoi(key);
-        simulateKeyPress(hwnd, keyASCII);
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+        for (const auto& keyCode : keyCodes)
+        {
+            simulateKeyPress(hwnd, keyCode);
+            std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+        }
     }
 
     return 0;
