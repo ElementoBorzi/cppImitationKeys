@@ -1,6 +1,8 @@
 #include <iostream>
 #include <Windows.h>
 #include <string>
+#include <chrono>
+#include <thread>
 
 // Функция для отправки цифры в выбранный процесс
 void sendNumberToProcess(HWND hwnd, int number)
@@ -18,13 +20,16 @@ int main()
         return 1;
     }
 
+    std::string numberString;
+    std::string intervalString;
+
     while (true)
     {
-        std::string numberString;
-        std::string intervalString;
-
-        std::cout << "Введите цифры, разделенные запятой: ";
+        std::cout << "Введите цифры, разделенные запятой (или 'exit' для выхода): ";
         std::getline(std::cin, numberString);
+
+        if (numberString == "exit")
+            break;
 
         std::cout << "Введите интервал в миллисекундах: ";
         std::getline(std::cin, intervalString);
@@ -39,7 +44,7 @@ int main()
             std::string number = numberString.substr(prevPos, pos - prevPos);
             sendNumberToProcess(hwnd, std::stoi(number));
             prevPos = pos + 1;
-            Sleep(interval);
+            std::this_thread::sleep_for(std::chrono::milliseconds(interval));
         }
 
         // Отправка последней цифры после последней запятой (или единственной цифры, если запятых нет)
