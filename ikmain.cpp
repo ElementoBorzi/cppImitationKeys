@@ -1,66 +1,47 @@
-#include <QApplication>
-#include <QMainWindow>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QTimer>
-#include <Windows.h>
 #include <iostream>
+#include <Windows.h>
 
 // Функция для отправки цифры в выбранный процесс
-void sendNumberToProcess(int number)
+void sendNumberToProcess(HWND hwnd, int number)
+{
+    SendMessageA(hwnd, WM_CHAR, '0' + number, 0);
+}
+
+int main()
 {
     HWND hwnd = FindWindowA(NULL, "Название окна процесса"); // Замените "Название окна процесса" на фактическое название окна процесса, в которое вы хотите отправлять цифры
 
     if (hwnd == NULL)
     {
         std::cout << "Ошибка: не удалось найти окно процесса" << std::endl;
-        return;
+        return 1;
     }
 
-    // Отправка цифры в окно процесса
-    SendMessageA(hwnd, WM_CHAR, '0' + number, 0);
+    std::string numberString;
+    std::string intervalString;
+
+    std::cout << "Введите цифры, разделенные запятой: ";
+    std::getline(std::cin, numberString);
+
+    std::cout << "Введите интервал в миллисекундах: ";
+    std::getline(std::cin, intervalString);
+
+    int interval = std::stoi(intervalString);
+
+    std::string::size_type pos = 0;
+    std::string::size_type prevPos = 0;
+
+    while ((pos = numberString.find(',', prevPos)) != std::string::npos)
+    {
+        std::string number = numberString.substr(prevPos, pos - prevPos);
+        sendNumberToProcess(hwnd, std::stoi(number));
+        prevPos = pos + 1;
+        Sleep(interval);
+    }
+
+    // Отправка последней цифры после последней запятой (или единственной цифры, если запятых нет)
+    std::string number = numberString.substr(prevPos);
+    sendNumberToProcess(hwnd, std::stoi(number));
+
+    return 0;
 }
-
-int main(int argc, char *argv[])
-{
-    QApplication app(argc, argv);
-
-    // Создание главного окна
-    QMainWindow window;
-    window.setWindowTitle("Отправка цифр в процесс");
-    window.setFixedSize(300, 150);
-
-    // Создание виджетов GUI
-    QLineEdit *numberLineEdit = new QLineEdit(&window);
-    QLineEdit *intervalLineEdit = new QLineEdit(&window);
-    QPushButton *startButton = new QPushButton("Старт", &window);
-
-    // Создание компоновщиков
-    QVBoxLayout *mainLayout = new QVBoxLayout();
-    QHBoxLayout *inputLayout = new QHBoxLayout();
-    inputLayout->addWidget(numberLineEdit);
-    inputLayout->addWidget(intervalLineEdit);
-
-    // Установка компоновки главного окна
-    mainLayout->addLayout(inputLayout);
-    mainLayout->addWidget(startButton);
-
-    // Установка компоновки на главное окно
-    QWidget *centralWidget = new QWidget(&window);
-    centralWidget->setLayout(mainLayout);
-    window.setCentralWidget(centralWidget);
-
-    // Соединение сигнала нажатия кнопки со слотом для отправки цифр
-    QObject::connect(startButton, &QPushButton::clicked, [&]() {
-        QString numberString = numberLineEdit->text();
-        QString intervalString = intervalLineEdit->text();
-
-        int interval = intervalString.toInt();
-
-        QStringList numbers = numberString.split(',');
-
-        QTimer *timer = new QTimer(&window);
-
-       
